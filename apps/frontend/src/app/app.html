@@ -1,0 +1,56 @@
+<div class="app-shell">
+  <header class="federal-header">
+    <a class="brand" routerLink="/" aria-label="DAAIF Startseite">
+      <span class="brand-mark" aria-hidden="true"><span>+</span></span>
+      <span class="brand-copy"><strong>DAAIF</strong><small>Data Analytics &amp; AI Factory</small></span>
+    </a>
+    <div class="header-context">
+      <label class="tenant-picker">
+        <span>Mandant</span>
+        <select [value]="tenant.current().id" (change)="selectTenant($any($event.target).value)">
+          @for (item of tenant.tenants; track item.id) {
+            <option [value]="item.id">{{ item.label }}</option>
+          }
+        </select>
+      </label>
+      <div class="connection-badge" [ngClass]="'is-' + realtime.state()" role="status" aria-live="polite">
+        <span class="connection-dot" aria-hidden="true"></span>
+        {{ connectionLabel() }}
+      </div>
+      <app-update />
+      <button class="mobile-nav-button" type="button" (click)="mobileNavOpen.set(!mobileNavOpen())" aria-label="Navigation öffnen">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <aside class="side-navigation" [class.is-open]="mobileNavOpen()">
+      <nav aria-label="Hauptnavigation" (click)="mobileNavOpen.set(false)">
+        <a routerLink="/overview" routerLinkActive="is-active">
+          <span class="nav-icon" aria-hidden="true">⌂</span><span>Übersicht</span>
+        </a>
+        <a routerLink="/query-studio" routerLinkActive="is-active">
+          <span class="nav-icon nav-code" aria-hidden="true">&gt;_</span><span>Query Studio</span>
+        </a>
+        <a routerLink="/catalog" routerLinkActive="is-active">
+          <span class="nav-icon" aria-hidden="true">◫</span><span>Datenquellen</span>
+        </a>
+        <a routerLink="/products" routerLinkActive="is-active">
+          <span class="nav-icon" aria-hidden="true">◇</span><span>Datenprodukte</span>
+        </a>
+        <a routerLink="/architecture" routerLinkActive="is-active">
+          <span class="nav-icon" aria-hidden="true">⌘</span><span>Architektur</span>
+        </a>
+      </nav>
+      <div class="side-footer">
+        <span class="environment-pill">PoC · Zielarchitektur</span>
+        <p>Angular PWA · API · Backend · MCP</p>
+      </div>
+    </aside>
+
+    <main class="main-content" id="main-content">
+      <router-outlet />
+    </main>
+  </div>
+</div>

@@ -1,0 +1,77 @@
+name: daaif
+
+services:
+  backend:
+    build:
+      context: ./apps/backend
+    environment:
+      DAAIF_BACKEND_ENVIRONMENT: development
+      DAAIF_BACKEND_DATA_ROOT: /data
+      DAAIF_BACKEND_INTERNAL_CONTEXT_SECRET: ${DAAIF_INTERNAL_CONTEXT_SECRET:-local-context-secret-change-me}
+      DAAIF_BACKEND_AI_GATEWAY_BASE_URL: ${DAAIF_AI_GATEWAY_BASE_URL:-}
+      DAAIF_BACKEND_AI_GATEWAY_API_KEY: ${DAAIF_AI_GATEWAY_API_KEY:-}
+      DAAIF_BACKEND_AI_GATEWAY_MODEL: ${DAAIF_AI_GATEWAY_MODEL:-sql-optimizer}
+    expose:
+      - "8001"
+    volumes:
+      - daaif-backend-data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8001/health', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  api:
+    build:
+      context: ./apps/api
+    environment:
+      DAAIF_API_ENVIRONMENT: development
+      DAAIF_API_BACKEND_URL: http://backend:8001/internal/v1
+      DAAIF_API_INTERNAL_CONTEXT_SECRET: ${DAAIF_INTERNAL_CONTEXT_SECRET:-local-context-secret-change-me}
+      DAAIF_API_AUTH_MODE: dev
+      DAAIF_API_CORS_ORIGINS: '["http://localhost:4200","http://localhost:8080"]'
+    ports:
+      - "${DAAIF_API_PORT:-8000}:8000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/ready', timeout=2)"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./apps/frontend
+    ports:
+      - "${DAAIF_FRONTEND_PORT:-8080}:8080"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+  mcp-server:
+    build:
+      context: ./apps/mcp-server
+    environment:
+      DAAIF_MCP_API_URL: http://api:8000/api/v1
+      DAAIF_MCP_TENANT_ID: estv
+      DAAIF_MCP_USER_ID: mcp.catalog@local
+      DAAIF_MCP_HOST: 0.0.0.0
+      DAAIF_MCP_PORT: 8002
+      DAAIF_MCP_ALLOWED_HOSTS: '["localhost:*","127.0.0.1:*","[::1]:*","mcp-server:*"]'
+      DAAIF_MCP_ALLOWED_ORIGINS: '["http://localhost:*","http://127.0.0.1:*"]'
+    ports:
+      - "${DAAIF_MCP_PORT:-8002}:8002"
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  daaif-backend-data:

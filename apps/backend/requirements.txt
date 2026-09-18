@@ -1,0 +1,7 @@
+fastapi==0.141.1
+uvicorn[standard]==0.35.0
+duckdb==1.5.5
+httpx[socks]==0.28.1
+PyJWT==2.10.1
+pydantic-settings==2.10.1
+sqlglot==27.14.0

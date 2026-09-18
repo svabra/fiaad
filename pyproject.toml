@@ -1,0 +1,12 @@
+[tool.pytest.ini_options]
+testpaths = ["apps/backend/tests", "apps/api/tests", "apps/mcp-server/tests"]
+pythonpath = ["apps/backend/src", "apps/api/src", "apps/mcp-server/src"]
+addopts = "-q"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC"]
+

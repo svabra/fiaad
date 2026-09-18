@@ -1,0 +1,4 @@
+-r apps/backend/requirements-dev.txt
+-r apps/api/requirements-dev.txt
+-r apps/mcp-server/requirements-dev.txt
+
